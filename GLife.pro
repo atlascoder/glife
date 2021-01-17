@@ -1,15 +1,21 @@
 QT += quick
 
-CONFIG += c++14
+CONFIG += c++14 sdk_no_version_check
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        life.cpp \
-        lifemodel.cpp \
-        main.cpp
+        glalgo.cpp \
+        glnaive.cpp \
+        lifecontroller.cpp \
+        main.cpp \
+        rlereader.cpp \
+        samplescatalog.cpp \
+        sampleview.cpp \
+        universeview.cpp
+
 
 RESOURCES += qml.qrc
 
@@ -28,5 +34,30 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    life.h \
-    lifemodel.h
+    bitmat.h \
+    glalgo.h \
+    glnaive.h \
+    lifecontroller.h \
+    rlereader.h \
+    samplescatalog.h \
+    sampleview.h \
+    universeview.h
+
+
+TARGETDIR = ''
+
+macx {
+  TARGETDIR      += $$OUT_PWD/$${TARGET}.app/Contents/MacOS
+}
+else {
+  TARGETDIR      += $$OUT_PWD
+}
+
+mkdata.commands = $(MKDIR) $${TARGETDIR}/rle
+copydata.commands = $(COPY_DIR) $$PWD/rle $${TARGETDIR}
+
+first.depends = $(first) mkdata copydata
+export(first.depends)
+export(mkdata.commands)
+export(copydata.commands)
+QMAKE_EXTRA_TARGETS += first mkdata copydata
