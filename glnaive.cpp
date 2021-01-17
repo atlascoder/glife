@@ -7,7 +7,7 @@
 #include <chrono>
 
 GLNaive::GLNaive(): GLAlgo(),
-    mMat(new bitmatrix_t(mHeight, mWidth))
+    mMat(new Universe(mHeight, mWidth))
 {
 
 }
@@ -50,9 +50,10 @@ void GLNaive::nextGen()
 {
     auto t1 = std::chrono::high_resolution_clock::now();
     size_t size = mMat->lengthInBits();
-    bitmatrix_t& bm = *mMat;
-    std::unique_ptr<bitmatrix_t> next_mat(new bitmatrix_t(mHeight, mWidth));
-    bitmatrix_t& next = *next_mat;
+    Universe& bm = *mMat;
+    std::unique_ptr<Universe> next_mat(new Universe(mHeight, mWidth));
+    Universe& next = *next_mat;
+    next.clear();
     mPopulation = 0;
     for (size_t i = 0; i < size; i++) {
         char ns = neighbors(i);
@@ -70,7 +71,8 @@ void GLNaive::nextGen()
 
 void GLNaive::insertSample(const QBitmap &other, unsigned x, unsigned y)
 {
-    bitmatrix_t& bm = *mMat;
+    Universe& bm = *mMat;
+    bm.clear();
     unsigned right = x + static_cast<unsigned>(other.width()) > bm.cols() ? bm.cols() : x + static_cast<unsigned>(other.width());
     unsigned bottom = y + static_cast<unsigned>(other.height()) > bm.rows() ? bm.rows() : y + static_cast<unsigned>(other.height());
     QImage img = other.toImage();
@@ -88,7 +90,7 @@ void GLNaive::setUniverse(const QBitmap&)
 
 QBitmap GLNaive::drawUniverse() const
 {
-    return QBitmap::fromData(QSize(static_cast<int>(mWidth), static_cast<int>(mHeight)), static_cast<uchar*>(mMat->data()), QImage::Format::Format_Mono);
+    return QBitmap::fromData(QSize(static_cast<int>(mWidth), static_cast<int>(mHeight)), mMat->data(), QImage::Format::Format_Mono);
 }
 
 bool GLNaive::isAlive(unsigned x, unsigned y) const
@@ -109,7 +111,7 @@ void GLNaive::randomize()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<unsigned> rg;
     size_t len = mMat->lengthInBits() / sizeof (int) / 8;
-    unsigned* p_mat_ints = static_cast<unsigned*>(mMat->data());
+    unsigned* p_mat_ints = reinterpret_cast<unsigned*>(mMat->data());
     mPopulation = 0;
     for (size_t i = 0; i < len; i++) {
         unsigned val = rg(gen);
@@ -129,7 +131,7 @@ char GLNaive::neighbors(size_t idx) const
 {
     bool out[8];
     long _idx = static_cast<long>(idx) - mWidth - 1;
-    bitmatrix_t& mat = *mMat;
+    Universe& mat = *mMat;
     out[0] = mat[smod(_idx, mSize)];
     out[1] = mat[smod(++_idx, mSize)];
     out[2] = mat[smod(++_idx, mSize)];

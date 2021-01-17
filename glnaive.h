@@ -4,9 +4,8 @@
 #include "glalgo.h"
 
 #include <QString>
-#include "bitmat.h"
-
-typedef bitmat<unsigned char> bitmatrix_t;
+#include "universe.h"
+#include "borderrule.h"
 
 class GLNaive: public GLAlgo
 {
@@ -25,7 +24,7 @@ public:
     void toggle(unsigned x, unsigned y) override;
     void randomize() override;
 private:
-    std::unique_ptr<bitmatrix_t> mMat;
+    std::unique_ptr<Universe> mMat;
     char neighbors(size_t idx) const;
 };
 

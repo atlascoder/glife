@@ -14,6 +14,7 @@ SOURCES += \
         rlereader.cpp \
         samplescatalog.cpp \
         sampleview.cpp \
+        universe.cpp \
         universeview.cpp
 
 
@@ -34,13 +35,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    bitmat.h \
+    borderrule.h \
     glalgo.h \
     glnaive.h \
     lifecontroller.h \
     rlereader.h \
     samplescatalog.h \
     sampleview.h \
+    universe.h \
     universeview.h
 
 

@@ -106,7 +106,6 @@ long LifeController::lastGenerationTime() const
 
 void LifeController::run()
 {
-    qDebug() << "Run...";
     connect(this, &LifeController::generate, this, &LifeController::doGeneration);
     exec();
 }
