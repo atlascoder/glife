@@ -8,7 +8,6 @@ CONFIG += c++14 sdk_no_version_check
 
 SOURCES += \
         glalgo.cpp \
-        glbitset.cpp \
         glnaive.cpp \
         lifecontroller.cpp \
         main.cpp \
@@ -36,7 +35,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     bitmat.h \
     glalgo.h \
-    glbitset.h \
     glnaive.h \
     lifecontroller.h \
     rlereader.h \

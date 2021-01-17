@@ -26,8 +26,13 @@ Window {
         width: root.width
         color: "silver"
         height: 32
+        property int buttonHeight: 28
         Row {
-            anchors.fill: parent
+            width: parent.width
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
+            anchors.verticalCenter: parent.verticalCenter
+            height: controlBar.buttonHeight
             spacing: 4
             Button {
                 id: runButton
@@ -41,13 +46,6 @@ Window {
                 }
             }
             Button {
-                id: clearButton
-                height: parent.height
-                visible: !lifeController.simulationActive
-                text: "CLEAR"
-                onClicked: lifeController.clear()
-            }
-            Button {
                 id: stepButton
                 height: parent.height
                 visible: !lifeController.simulationActive
@@ -58,7 +56,7 @@ Window {
                 height: parent.height
                 spacing: 8
                 visible: !lifeController.simulationActive
-                Text { text: "Rows:"; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "Heihgt:"; anchors.verticalCenter: parent.verticalCenter }
                 SpinBox {
                     id: rowsInput
                     height: parent.height
@@ -74,7 +72,7 @@ Window {
                 height: parent.height
                 spacing: 8
                 visible: !lifeController.simulationActive
-                Text { text: "Cols:"; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "Width:"; anchors.verticalCenter: parent.verticalCenter }
                 SpinBox {
                     id: colsInput
                     height: parent.height
@@ -85,6 +83,21 @@ Window {
                     editable: true
                     onValueChanged: lifeController.width = value
                 }
+            }
+            ComboBox {
+                height: parent.height
+                model: ListModel {
+                    ListElement { text: "Closing" }
+                    ListElement { text: "Dead" }
+                    ListElement { text: "Alive" }
+                }
+            }
+            Button {
+                id: clearButton
+                height: parent.height
+                visible: !lifeController.simulationActive
+                text: "CLEAR"
+                onClicked: lifeController.clear()
             }
             Button {
                 id: randomButton

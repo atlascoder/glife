@@ -1,6 +1,7 @@
 #include "universeview.h"
 
 #include <QPainter>
+#include <cstring>
 #include "glalgo.h"
 
 UniverseView::UniverseView(QQuickItem* parent):

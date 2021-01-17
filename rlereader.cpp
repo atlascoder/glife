@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QStringBuilder>
 #include <QTextStream>
+#include <cstring>
 
 RleReader::RleReader(const QString& filePath):
     mContent(),

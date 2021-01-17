@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <vector>
-
+#include <cstring>
 /*
  *  `bitmap` is a custom implemetation of matrix of bits.
  *  T is a the real storage type that can vary.

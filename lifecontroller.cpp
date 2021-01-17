@@ -6,6 +6,7 @@
 LifeController::LifeController(QObject* parent): QThread(parent),
     mAlgo(new GLNaive),
     mInsertingMode(false),
+    mSimulationActive(false),
     mTimer(),
     mGenerating(false)
 {
