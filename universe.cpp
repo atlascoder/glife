@@ -3,6 +3,8 @@
 #include <memory>
 #include <cstring>
 
+typedef unsigned char uchar;
+
 
 static const unsigned bits_in_t = 8;
 static const unsigned char lsb_1 = 0x80;
@@ -86,21 +88,255 @@ void Universe::set(unsigned long idx, bool value) {
     }
 }
 
+inline uchar count_row(const uchar* row, unsigned col_idx, unsigned last_col_idx)
+{
+    uchar count = 0;
+    if (col_idx == 0) {
+        // first column
+        uchar b1_2 = row[0] >> 6;
+        count += b1_2 & 0x01;
+        b1_2 >>= 1;
+        count += b1_2 & 0x01;
+        count += row[last_col_idx / 8] & 0x01;
+    }
+    else if (col_idx == last_col_idx) {
+        // last column
+        count += (row[0] >> 7) & 0x01;
+        uchar b0_1 = row[last_col_idx / 8];
+        count += b0_1 & 0x01;
+        b0_1 >>= 1;
+        count += b0_1 & 0x01;
+    }
+    else {
+        unsigned b0_idx = col_idx - 1;
+        const uchar* bp = row + b0_idx / 8;
+        uchar b0_x = bp[0];
+        uchar b0_pos = b0_idx % 8;
+        if (b0_pos < 6) {
+            b0_x >>= 5 - b0_pos;
+            count += b0_x & 0x01;
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+        }
+        else if (b0_pos == 6) {
+            count += b0_x & 0x01;
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            count += b1_2 >> 7;
+        }
+        else {
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            b1_2 >>= 6;
+            count += b1_2 & 0x01;
+            b1_2 >>= 1;
+            count += b1_2 & 0x01;
+        }
+    }
+    return count;
+}
+
+inline uchar count_mid_row(const uchar* row, unsigned col_idx, unsigned last_col_idx)
+{
+    uchar count = 0;
+    if (col_idx == 0) {
+        // first column
+        uchar b2 = row[0] >> 6;
+        count += b2 & 0x01;
+        count += row[last_col_idx / 8] & 0x01;
+    }
+    else if (col_idx == last_col_idx) {
+        // last column
+        count += (row[0] >> 7) & 0x01;
+        uchar b0_1 = row[last_col_idx / 8];
+        b0_1 >>= 1;
+        count += b0_1 & 0x01;
+    }
+    else {
+        unsigned b0_idx = col_idx - 1;
+        const uchar* bp = row + b0_idx / 8;
+        uchar b0_x = bp[0];
+        uchar b0_pos = b0_idx % 8;
+        if (b0_pos < 6) {
+            b0_x >>= 5 - b0_pos;
+            count += b0_x & 0x01;
+            b0_x >>= 2;
+            count += b0_x & 0x01;
+        }
+        else if (b0_pos == 6) {
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            count += b1_2 >> 7;
+        }
+        else {
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            b1_2 >>= 6;
+            count += b1_2 & 0x01;
+        }
+    }
+    return count;
+}
+
+inline uchar count_bordered_row(const uchar* row, unsigned col_idx, unsigned last_col_idx, bool borderAlive)
+{
+    uchar count = 0;
+    if (col_idx == 0) {
+        // first column
+        uchar b1_2 = row[0] >> 6;
+        count += b1_2 & 0x01;
+        b1_2 >>= 1;
+        count += b1_2 & 0x01;
+        if (borderAlive) count++;
+    }
+    else if (col_idx == last_col_idx) {
+        // last column
+        if (borderAlive) count++;
+        uchar b0_1 = row[last_col_idx / 8];
+        count += b0_1 & 0x01;
+        b0_1 >>= 1;
+        count += b0_1 & 0x01;
+    }
+    else {
+        unsigned b0_idx = col_idx - 1;
+        const uchar* bp = row + b0_idx / 8;
+        uchar b0_x = bp[0];
+        uchar b0_pos = b0_idx % 8;
+        if (b0_pos < 6) {
+            b0_x >>= 5 - b0_pos;
+            count += b0_x & 0x01;
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+        }
+        else if (b0_pos == 6) {
+            count += b0_x & 0x01;
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            count += b1_2 >> 7;
+        }
+        else {
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            b1_2 >>= 6;
+            count += b1_2 & 0x01;
+            b1_2 >>= 1;
+            count += b1_2 & 0x01;
+        }
+    }
+    return count;
+}
+
+inline uchar count_bordered_mid_row(const uchar* row, unsigned col_idx, unsigned last_col_idx, bool borderAlive)
+{
+    uchar count = 0;
+    if (col_idx == 0) {
+        // first column
+        uchar b2 = row[0] >> 6;
+        count += b2 & 0x01;
+        if (borderAlive) count++;
+    }
+    else if (col_idx == last_col_idx) {
+        // last column
+        if (borderAlive) count++;
+        uchar b0_1 = row[last_col_idx / 8];
+        b0_1 >>= 1;
+        count += b0_1 & 0x01;
+    }
+    else {
+        unsigned b0_idx = col_idx - 1;
+        const uchar* bp = row + b0_idx / 8;
+        uchar b0_x = bp[0];
+        uchar b0_pos = b0_idx % 8;
+        if (b0_pos < 6) {
+            b0_x >>= 5 - b0_pos;
+            count += b0_x & 0x01;
+            b0_x >>= 2;
+            count += b0_x & 0x01;
+        }
+        else if (b0_pos == 6) {
+            b0_x >>= 1;
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            count += b1_2 >> 7;
+        }
+        else {
+            count += b0_x & 0x01;
+            uchar b1_2 = bp[1];
+            b1_2 >>= 6;
+            count += b1_2 & 0x01;
+        }
+    }
+    return count;
+}
+
 char Universe::countMooreNeighborsBordersClosing(unsigned long idx, int stopOn)
 {
-    char count = 0;
+    // upper row
+    unsigned row = idx / mCols;
+    unsigned col_idx = idx % mCols;
+    unsigned last_col_idx = mCols - 1;
+    char count = count_row(mVector + mRowLengthAligned * (row ? row - 1 : mRows - 1), col_idx, last_col_idx);
+    if (count >= stopOn) return count;
+    count += count_mid_row(mVector + mRowLengthAligned * row, col_idx, last_col_idx);
+    if (count >= stopOn) return count;
+    count += count_row(mVector + (row == mRows - 1 ? 0 : mRowLengthAligned * (row + 1)), col_idx, last_col_idx);
     return count;
 }
 
 char Universe::countMooreNeighborsBordersDead(unsigned long idx, int stopOn)
 {
+    unsigned row = idx / mCols;
+    unsigned col_idx = idx % mCols;
+    unsigned last_col_idx = mCols - 1;
     char count = 0;
+
+    if (row != 0) {
+        count += count_bordered_row(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, false);
+    }
+    if (count == stopOn) return count;
+
+    count += count_bordered_mid_row(mVector + mRowLengthAligned*row, col_idx, last_col_idx, false);
+
+    if (count == stopOn) return count;
+
+    if (row != mRows - 1) {
+        count += count_bordered_row(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, false);
+    }
     return count;
 }
 
-char Universe::countMooreNeighborsBorderAlive(unsigned long idx, int stopOn)
+char Universe::countMooreNeighborsBordersAlive(unsigned long idx, int stopOn)
 {
+    unsigned row = idx / mCols;
+    unsigned col_idx = idx % mCols;
+    unsigned last_col_idx = mCols - 1;
     char count = 0;
+
+    if (row == 0) {
+        count += 3;
+    }
+    else {
+        count += count_bordered_row(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, true);
+    }
+    if (count == stopOn) return count;
+
+    count += count_bordered_mid_row(mVector + mRowLengthAligned*row, col_idx, last_col_idx, true);
+
+    if (count == stopOn) return count;
+
+    if (row == mRows - 1) {
+        count += 3;
+    }
+    else {
+        count += count_bordered_row(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, true);
+    }
     return count;
 }
 

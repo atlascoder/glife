@@ -4,8 +4,9 @@
 #include "glalgo.h"
 
 #include <QString>
-#include "universe.h"
-#include "borderrule.h"
+#include <memory>
+
+class Universe;
 
 class GLNaive: public GLAlgo
 {
@@ -23,9 +24,8 @@ public:
     bool isAlive(unsigned x, unsigned y) const override;
     void toggle(unsigned x, unsigned y) override;
     void randomize() override;
-private:
+protected:
     std::unique_ptr<Universe> mMat;
-    char neighbors(size_t idx) const;
 };
 
 #endif // GLNAIVE_H

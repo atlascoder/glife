@@ -22,7 +22,7 @@ public:
 
     char countMooreNeighborsBordersClosing(unsigned long idx, int stopOn);
     char countMooreNeighborsBordersDead(unsigned long idx, int stopOn);
-    char countMooreNeighborsBorderAlive(unsigned long idx, int stopOn);
+    char countMooreNeighborsBordersAlive(unsigned long idx, int stopOn);
 
     void set(unsigned row, unsigned col, bool value);
     void resize(unsigned rows, unsigned cols);

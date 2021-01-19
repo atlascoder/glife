@@ -6,7 +6,8 @@ GLAlgo::GLAlgo():
     mLastGenerationTime(0),
     mWidth(defaultWidth),
     mHeight(defaultHeight),
-    mSize(static_cast<size_t>(mWidth * mHeight))
+    mSize(static_cast<size_t>(mWidth * mHeight)),
+    mBorderRule(BorderRule::CLOSING)
 {
 
 }
@@ -14,4 +15,10 @@ GLAlgo::GLAlgo():
 GLAlgo::~GLAlgo()
 {
 
+}
+
+void GLAlgo::setBorderRule(const BorderRule rule)
+{
+    if (rule == mBorderRule) return;
+    mBorderRule = rule;
 }

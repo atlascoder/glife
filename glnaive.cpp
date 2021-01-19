@@ -6,10 +6,12 @@
 #include <random>
 #include <chrono>
 
+#include "universe.h"
+
 GLNaive::GLNaive(): GLAlgo(),
     mMat(new Universe(mHeight, mWidth))
 {
-
+    mMat->clear();
 }
 
 GLNaive::~GLNaive()
@@ -27,6 +29,7 @@ void GLNaive::setSize(unsigned width, unsigned height)
     mWidth = width;
     mHeight = height;
     mMat->resize(mHeight, mWidth);
+    mMat->clear();
     mSize = mMat->lengthInBits();
 }
 
@@ -34,16 +37,6 @@ void GLNaive::reset()
 {
     mMat->clear();
     mGeneration = 0;
-}
-
-int has_bits_in_char(const char in, const int count)
-{
-    int c = 0, i =0;
-    while (i < 8 && c < count) {
-        if (in & (1<<i)) c++;
-        i++;
-    }
-    return c;
 }
 
 void GLNaive::nextGen()
@@ -55,9 +48,23 @@ void GLNaive::nextGen()
     Universe& next = *next_mat;
     next.clear();
     mPopulation = 0;
+    char (Universe::*fn)(unsigned long, int);
+    switch (mBorderRule) {
+    case BorderRule::CLOSING:
+        fn = &Universe::countMooreNeighborsBordersClosing;
+        break;
+    case BorderRule::ALIVE:
+        fn = &Universe::countMooreNeighborsBordersAlive;
+        break;
+    case BorderRule::DEAD:
+        fn = &Universe::countMooreNeighborsBordersDead;
+        break;
+    default:
+        fn = &Universe::countMooreNeighborsBordersClosing;
+    }
+
     for (size_t i = 0; i < size; i++) {
-        char ns = neighbors(i);
-        int count = has_bits_in_char(ns, 4);
+        int count = (*mMat.*fn)(i, 4);
         if (count == 3 || (count == 2 && bm[i])) {
             next.set(i, true);
             mPopulation++;
@@ -72,7 +79,6 @@ void GLNaive::nextGen()
 void GLNaive::insertSample(const QBitmap &other, unsigned x, unsigned y)
 {
     Universe& bm = *mMat;
-    bm.clear();
     unsigned right = x + static_cast<unsigned>(other.width()) > bm.cols() ? bm.cols() : x + static_cast<unsigned>(other.width());
     unsigned bottom = y + static_cast<unsigned>(other.height()) > bm.rows() ? bm.rows() : y + static_cast<unsigned>(other.height());
     QImage img = other.toImage();
@@ -105,44 +111,21 @@ void GLNaive::toggle(unsigned x, unsigned y)
     mMat->set(idx, !(*mMat)[idx]);
 }
 
+
+
 void GLNaive::randomize()
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
     std::uniform_int_distribution<unsigned> rg;
     size_t len = mMat->lengthInBits() / sizeof (int) / 8;
     unsigned* p_mat_ints = reinterpret_cast<unsigned*>(mMat->data());
     mPopulation = 0;
     for (size_t i = 0; i < len; i++) {
         unsigned val = rg(gen);
-        for (unsigned i = 0; i < sizeof(int)*8; i++)
+        for (unsigned i = 0; i < sizeof(unsigned)*8; i++)
             if (val & (1 < i)) mPopulation++;
         p_mat_ints[i] = val;
     }
     mGeneration = 0;
-}
-
-size_t inline smod(long a, size_t b)
-{
-    return a < 0 ? b - static_cast<size_t>(-a) : static_cast<size_t>(a) % b;
-}
-
-char GLNaive::neighbors(size_t idx) const
-{
-    bool out[8];
-    long _idx = static_cast<long>(idx) - mWidth - 1;
-    Universe& mat = *mMat;
-    out[0] = mat[smod(_idx, mSize)];
-    out[1] = mat[smod(++_idx, mSize)];
-    out[2] = mat[smod(++_idx, mSize)];
-    out[3] = mat[smod(static_cast<long>(idx) + 1, mSize)];
-    _idx = static_cast<long>(idx) + mWidth + 1;
-    out[4] = mat[smod(_idx, mSize)];
-    out[5] = mat[smod(--_idx, mSize)];
-    out[6] = mat[smod(--_idx, mSize)];
-    out[7] = mat[smod(static_cast<long>(idx) - 1, mSize)];
-    char result {0};
-    for (int i = 0; i < 8; i++)
-        if (out[i]) result = result | (0x80 >> i);
-    return result;
 }

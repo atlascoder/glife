@@ -3,8 +3,8 @@
 
 typedef enum {
     CLOSING = 0,
-    ALIVE,
-    DEAD
+    DEAD,
+    ALIVE
 } BorderRule;
 
 #endif // BORDERRULE_H

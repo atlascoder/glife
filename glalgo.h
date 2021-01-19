@@ -1,7 +1,8 @@
 #ifndef GLALGO_H
 #define GLALGO_H
 
-#include <memory>
+#include <cstddef>
+#include "borderrule.h"
 
 class QBitmap;
 class QString;
@@ -30,6 +31,9 @@ public:
     unsigned long lastGenerationTime() const { return mLastGenerationTime; }
     unsigned width() const { return mWidth; }
     unsigned height() const { return mHeight; }
+    BorderRule borderRule() const { return mBorderRule; }
+    void setBorderRule(const BorderRule rule);
+
 protected:
     size_t mGeneration;
     size_t mPopulation;
@@ -37,6 +41,7 @@ protected:
     unsigned mWidth;
     unsigned mHeight;
     size_t mSize;
+    BorderRule mBorderRule;
 };
 
 #endif // GLALGO_H

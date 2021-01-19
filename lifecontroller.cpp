@@ -8,7 +8,8 @@ LifeController::LifeController(QObject* parent): QThread(parent),
     mInsertingMode(false),
     mSimulationActive(false),
     mTimer(),
-    mGenerating(false)
+    mGenerating(false),
+    mBorderMode(BorderRule::CLOSING)
 {
     this->QThread::start();
     connect(&mTimer, &QTimer::timeout, this, &LifeController::step);
@@ -27,7 +28,7 @@ int LifeController::width() const
 
 void LifeController::setWidth(const int value)
 {
-    int w = value - value % 8;
+    unsigned w = static_cast<unsigned>(value - value % 8);
     if (w == mAlgo->width()) return;
     mAlgo->setSize(w, mAlgo->height());
     emit sizeChanged();
@@ -41,7 +42,7 @@ int LifeController::height() const
 
 void LifeController::setHeight(const int value)
 {
-    int h = value - value % 8;
+    unsigned h = static_cast<unsigned>(value - value % 8);
     if (h == mAlgo->height()) return;
     mAlgo->setSize(mAlgo->width(), h);
     emit sizeChanged();
@@ -113,6 +114,7 @@ void LifeController::run()
 void LifeController::doGeneration()
 {
     mGenerating = true;
+    mAlgo->setBorderRule(BorderRule(mBorderMode));
     mAlgo->nextGen();
     emit dataChanged();
     mGenerating = false;
@@ -127,6 +129,7 @@ void LifeController::setInsertingMode(const bool value)
 
 void LifeController::insertSample(const QBitmap &sample,int x, int y, bool clearReact)
 {
+    Q_UNUSED(clearReact)
     mAlgo->insertSample(sample, x, y);
     emit dataChanged();
 }
@@ -146,4 +149,11 @@ void LifeController::setInterval(const int value)
     if (value == mTimer.interval()) return;
     mTimer.setInterval(value);
     emit intervalChanged();
+}
+
+void LifeController::setBorderMode(const int borderMode)
+{
+    if (borderMode == mBorderMode) return;
+    mBorderMode = borderMode;
+    emit borderModeChanged();
 }

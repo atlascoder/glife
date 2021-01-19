@@ -21,6 +21,7 @@ class LifeController: public QThread
     Q_PROPERTY(bool insertingMode READ insertingMode WRITE setInsertingMode NOTIFY insertingModeChanged)
     Q_PROPERTY(bool simulationActive READ simulationActive NOTIFY simulationActiveChanged)
     Q_PROPERTY(int interval READ interval WRITE setInterval NOTIFY intervalChanged)
+    Q_PROPERTY(int borderMode READ borderMode WRITE setBorderMode NOTIFY borderModeChanged)
 public:
     LifeController(QObject* parent = nullptr);
     ~LifeController() override;
@@ -41,6 +42,9 @@ public:
 
     int interval() const { return mTimer.interval(); }
     void setInterval(const int value);
+
+    int borderMode() const { return mBorderMode; }
+    void setBorderMode(const int borderMode);
 
     QBitmap bitmap() const;
 
@@ -69,6 +73,7 @@ signals:
     void simulationActiveChanged();
 
     void intervalChanged();
+    void borderModeChanged();
 
 protected:
     void run() override;
@@ -79,6 +84,7 @@ private:
     bool mSimulationActive;
     QTimer mTimer;
     std::atomic<bool> mGenerating;
+    int mBorderMode;
 };
 
 #endif // LIFECONTROLLER_H

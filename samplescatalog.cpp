@@ -66,7 +66,7 @@ QVariant SamplesCatalog::data(const QModelIndex &index, int role) const
     }
 }
 
-int SamplesCatalog::rowCount(const QModelIndex &parent) const
+int SamplesCatalog::rowCount(const QModelIndex &) const
 {
     return mSamples.size();
 }

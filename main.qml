@@ -56,7 +56,7 @@ Window {
                 height: parent.height
                 spacing: 8
                 visible: !lifeController.simulationActive
-                Text { text: "Heihgt:"; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "Height:"; anchors.verticalCenter: parent.verticalCenter }
                 SpinBox {
                     id: rowsInput
                     height: parent.height
@@ -91,13 +91,8 @@ Window {
                     ListElement { text: "Dead" }
                     ListElement { text: "Alive" }
                 }
-            }
-            Button {
-                id: clearButton
-                height: parent.height
-                visible: !lifeController.simulationActive
-                text: "CLEAR"
-                onClicked: lifeController.clear()
+                currentIndex: lifeController.borderMode
+                onCurrentIndexChanged: lifeController.borderMode = currentIndex
             }
             Button {
                 id: randomButton
@@ -105,6 +100,13 @@ Window {
                 text: "RND"
                 visible: !lifeController.simulationActive
                 onClicked: lifeController.randomize()
+            }
+            Button {
+                id: clearButton
+                height: parent.height
+                visible: !lifeController.simulationActive
+                text: "CLEAR"
+                onClicked: lifeController.clear()
             }
             Button {
                 id: loadButton
