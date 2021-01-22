@@ -1,7 +1,6 @@
 #ifndef GLALGO_H
 #define GLALGO_H
 
-#include <cstddef>
 #include "borderrule.h"
 
 class QBitmap;
@@ -16,7 +15,7 @@ public:
     virtual ~GLAlgo();
     virtual QBitmap drawUniverse() const = 0;
     virtual QString name() const = 0;
-    virtual void setSize(unsigned width, int unsigned) = 0;
+    virtual void setSize(unsigned width, unsigned height) = 0;
     virtual void reset() = 0;
     virtual void nextGen() = 0;
     virtual void insertSample(const QBitmap& other, unsigned x, unsigned y) = 0;

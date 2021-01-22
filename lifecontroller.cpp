@@ -17,8 +17,10 @@ LifeController::LifeController(QObject* parent): QThread(parent),
 
 LifeController::~LifeController()
 {
-    quit();
-    wait();
+    if (QThread::isRunning()) {
+        quit();
+        wait();
+    }
 }
 
 int LifeController::width() const

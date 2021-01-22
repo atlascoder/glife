@@ -88,7 +88,7 @@ void Universe::set(unsigned long idx, bool value) {
     }
 }
 
-inline uchar count_row(const uchar* row, unsigned col_idx, unsigned last_col_idx)
+inline uchar COUNT_ROWC(const uchar* row, unsigned col_idx, unsigned last_col_idx)
 {
     uchar count = 0;
     if (col_idx == 0) {
@@ -139,7 +139,7 @@ inline uchar count_row(const uchar* row, unsigned col_idx, unsigned last_col_idx
     return count;
 }
 
-inline uchar count_mid_row(const uchar* row, unsigned col_idx, unsigned last_col_idx)
+inline uchar COUNT_M_ROWC(const uchar* row, unsigned col_idx, unsigned last_col_idx)
 {
     uchar count = 0;
     if (col_idx == 0) {
@@ -182,7 +182,7 @@ inline uchar count_mid_row(const uchar* row, unsigned col_idx, unsigned last_col
     return count;
 }
 
-inline uchar count_bordered_row(const uchar* row, unsigned col_idx, unsigned last_col_idx, bool borderAlive)
+inline uchar COUNT_ROW(const uchar* row, unsigned col_idx, unsigned last_col_idx, bool borderAlive)
 {
     uchar count = 0;
     if (col_idx == 0) {
@@ -233,7 +233,7 @@ inline uchar count_bordered_row(const uchar* row, unsigned col_idx, unsigned las
     return count;
 }
 
-inline uchar count_bordered_mid_row(const uchar* row, unsigned col_idx, unsigned last_col_idx, bool borderAlive)
+inline uchar COUNT_M_ROW(const uchar* row, unsigned col_idx, unsigned last_col_idx, bool borderAlive)
 {
     uchar count = 0;
     if (col_idx == 0) {
@@ -282,11 +282,11 @@ char Universe::countMooreNeighborsBordersClosing(unsigned long idx, int stopOn)
     unsigned row = idx / mCols;
     unsigned col_idx = idx % mCols;
     unsigned last_col_idx = mCols - 1;
-    char count = count_row(mVector + mRowLengthAligned * (row ? row - 1 : mRows - 1), col_idx, last_col_idx);
+    char count = COUNT_ROWC(mVector + mRowLengthAligned * (row ? row - 1 : mRows - 1), col_idx, last_col_idx);
     if (count >= stopOn) return count;
-    count += count_mid_row(mVector + mRowLengthAligned * row, col_idx, last_col_idx);
+    count += COUNT_M_ROWC(mVector + mRowLengthAligned * row, col_idx, last_col_idx);
     if (count >= stopOn) return count;
-    count += count_row(mVector + (row == mRows - 1 ? 0 : mRowLengthAligned * (row + 1)), col_idx, last_col_idx);
+    count += COUNT_ROWC(mVector + (row == mRows - 1 ? 0 : mRowLengthAligned * (row + 1)), col_idx, last_col_idx);
     return count;
 }
 
@@ -298,16 +298,16 @@ char Universe::countMooreNeighborsBordersDead(unsigned long idx, int stopOn)
     char count = 0;
 
     if (row != 0) {
-        count += count_bordered_row(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, false);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, false);
     }
     if (count == stopOn) return count;
 
-    count += count_bordered_mid_row(mVector + mRowLengthAligned*row, col_idx, last_col_idx, false);
+    count += COUNT_M_ROW(mVector + mRowLengthAligned*row, col_idx, last_col_idx, false);
 
     if (count == stopOn) return count;
 
     if (row != mRows - 1) {
-        count += count_bordered_row(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, false);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, false);
     }
     return count;
 }
@@ -323,11 +323,11 @@ char Universe::countMooreNeighborsBordersAlive(unsigned long idx, int stopOn)
         count += 3;
     }
     else {
-        count += count_bordered_row(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, true);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, true);
     }
     if (count == stopOn) return count;
 
-    count += count_bordered_mid_row(mVector + mRowLengthAligned*row, col_idx, last_col_idx, true);
+    count += COUNT_M_ROW(mVector + mRowLengthAligned*row, col_idx, last_col_idx, true);
 
     if (count == stopOn) return count;
 
@@ -335,7 +335,7 @@ char Universe::countMooreNeighborsBordersAlive(unsigned long idx, int stopOn)
         count += 3;
     }
     else {
-        count += count_bordered_row(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, true);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, true);
     }
     return count;
 }
