@@ -25,7 +25,7 @@ public:
     void toggle(unsigned x, unsigned y) override;
     void randomize() override;
 protected:
-    std::unique_ptr<Universe> mMat;
+    Universe* mUniverse;
 };
 
 #endif // GLNAIVE_H

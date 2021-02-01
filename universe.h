@@ -20,9 +20,9 @@ public:
     unsigned char* row(unsigned rowIdx);
     void set(unsigned long idx, bool value);
 
-    char countMooreNeighborsBordersClosing(unsigned long idx, int stopOn);
-    char countMooreNeighborsBordersDead(unsigned long idx, int stopOn);
-    char countMooreNeighborsBordersAlive(unsigned long idx, int stopOn);
+    char nsWithClosingB(unsigned row, unsigned col);
+    char nsWithDeadB(unsigned row, unsigned col);
+    char nsWithAliveB(unsigned row, unsigned col);
 
     void set(unsigned row, unsigned col, bool value);
     void resize(unsigned rows, unsigned cols);
@@ -34,9 +34,6 @@ public:
     unsigned lengthInStorageType() const;
     unsigned long lengthInBits() const;
 
-    void setBorderRule(const BorderRule rule);
-    BorderRule borderRule() const;
-
 private:
     unsigned mRows;
     unsigned mCols;
@@ -44,7 +41,6 @@ private:
     unsigned long mBits;
     unsigned mLength;
     unsigned char* mVector;
-    BorderRule mBorderRule;
 };
 
 #endif // BITMATRIX_H

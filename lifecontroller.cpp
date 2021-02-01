@@ -17,10 +17,12 @@ LifeController::LifeController(QObject* parent): QThread(parent),
 
 LifeController::~LifeController()
 {
+    stop();
     if (QThread::isRunning()) {
         quit();
         wait();
     }
+    delete mAlgo;
 }
 
 int LifeController::width() const
@@ -94,12 +96,12 @@ void LifeController::toggle(int x, int y)
 
 long LifeController::generation() const
 {
-    return mAlgo->generation();
+    return static_cast<long>(mAlgo->generation());
 }
 
 long LifeController::population() const
 {
-    return mAlgo->population();
+    return  static_cast<long>(mAlgo->population());
 }
 
 long LifeController::lastGenerationTime() const

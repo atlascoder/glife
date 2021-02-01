@@ -79,7 +79,7 @@ protected:
     void run() override;
 
 private:
-    std::unique_ptr<GLAlgo> mAlgo;
+    GLAlgo* mAlgo;
     bool mInsertingMode;
     bool mSimulationActive;
     QTimer mTimer;
