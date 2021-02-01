@@ -1,6 +1,4 @@
 #include "universe.h"
-
-#include <memory>
 #include <cstring>
 
 typedef unsigned char uchar;
@@ -15,8 +13,7 @@ Universe::Universe(unsigned rows, unsigned cols):
     mRowLengthAligned(mCols / bits_in_t + (mCols % bits_in_t != 0)),
     mBits(mRows * mCols),
     mLength(mRows * mRowLengthAligned),
-    mVector(new unsigned char[mLength]),
-    mBorderRule(BorderRule::CLOSING)
+    mVector(new unsigned char[mLength])
 {}
 
 Universe::~Universe() {
@@ -29,8 +26,7 @@ Universe::Universe(const Universe& other):
     mRowLengthAligned(other.mRowLengthAligned),
     mBits(other.mBits),
     mLength(other.mLength),
-    mVector(new unsigned char[mLength]),
-    mBorderRule(other.mBorderRule)
+    mVector(new unsigned char[mLength])
 {
     std::memcpy(mVector, other.mVector, mLength);
 }
@@ -40,8 +36,7 @@ Universe::Universe(Universe&& other):
     mCols(other.mCols),
     mRowLengthAligned(other.mRowLengthAligned),
     mBits(other.mBits),
-    mLength(other.mLength),
-    mBorderRule(other.mBorderRule)
+    mLength(other.mLength)
 {
     mVector = other.mVector;
     other.mVector = nullptr;
@@ -62,7 +57,6 @@ Universe& Universe::operator=(Universe&& other)
     unsigned char* tmp = mVector;
     mVector = other.mVector;
     other.mVector = tmp;
-    mBorderRule = other.mBorderRule;
     return *this;
 }
 
@@ -276,46 +270,40 @@ inline uchar COUNT_M_ROW(const uchar* row, unsigned col_idx, unsigned last_col_i
     return count;
 }
 
-char Universe::countMooreNeighborsBordersClosing(unsigned long idx, int stopOn)
+char Universe::nsWithClosingB(unsigned row, unsigned col)
 {
     // upper row
-    unsigned row = idx / mCols;
-    unsigned col_idx = idx % mCols;
     unsigned last_col_idx = mCols - 1;
-    char count = COUNT_ROWC(mVector + mRowLengthAligned * (row ? row - 1 : mRows - 1), col_idx, last_col_idx);
-    if (count >= stopOn) return count;
-    count += COUNT_M_ROWC(mVector + mRowLengthAligned * row, col_idx, last_col_idx);
-    if (count >= stopOn) return count;
-    count += COUNT_ROWC(mVector + (row == mRows - 1 ? 0 : mRowLengthAligned * (row + 1)), col_idx, last_col_idx);
+    char count = COUNT_ROWC(mVector + mRowLengthAligned * (row ? row - 1 : mRows - 1), col, last_col_idx);
+    if (count >= 4) return count;
+    count += COUNT_M_ROWC(mVector + mRowLengthAligned * row, col, last_col_idx);
+    if (count >= 4) return count;
+    count += COUNT_ROWC(mVector + (row == mRows - 1 ? 0 : mRowLengthAligned * (row + 1)), col, last_col_idx);
     return count;
 }
 
-char Universe::countMooreNeighborsBordersDead(unsigned long idx, int stopOn)
+char Universe::nsWithDeadB(unsigned row, unsigned col)
 {
-    unsigned row = idx / mCols;
-    unsigned col_idx = idx % mCols;
     unsigned last_col_idx = mCols - 1;
     char count = 0;
 
     if (row != 0) {
-        count += COUNT_ROW(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, false);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row - 1), col, last_col_idx, false);
     }
-    if (count == stopOn) return count;
+    if (count >= 4) return count;
 
-    count += COUNT_M_ROW(mVector + mRowLengthAligned*row, col_idx, last_col_idx, false);
+    count += COUNT_M_ROW(mVector + mRowLengthAligned*row, col, last_col_idx, false);
 
-    if (count == stopOn) return count;
+    if (count >= 4) return count;
 
     if (row != mRows - 1) {
-        count += COUNT_ROW(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, false);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row + 1), col, last_col_idx, false);
     }
     return count;
 }
 
-char Universe::countMooreNeighborsBordersAlive(unsigned long idx, int stopOn)
+char Universe::nsWithAliveB(unsigned row, unsigned col)
 {
-    unsigned row = idx / mCols;
-    unsigned col_idx = idx % mCols;
     unsigned last_col_idx = mCols - 1;
     char count = 0;
 
@@ -323,19 +311,19 @@ char Universe::countMooreNeighborsBordersAlive(unsigned long idx, int stopOn)
         count += 3;
     }
     else {
-        count += COUNT_ROW(mVector + mRowLengthAligned*(row - 1), col_idx, last_col_idx, true);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row - 1), col, last_col_idx, true);
     }
-    if (count == stopOn) return count;
+    if (count >= 4) return count;
 
-    count += COUNT_M_ROW(mVector + mRowLengthAligned*row, col_idx, last_col_idx, true);
+    count += COUNT_M_ROW(mVector + mRowLengthAligned*row, col, last_col_idx, true);
 
-    if (count == stopOn) return count;
+    if (count >= 4) return count;
 
     if (row == mRows - 1) {
         count += 3;
     }
     else {
-        count += COUNT_ROW(mVector + mRowLengthAligned*(row + 1), col_idx, last_col_idx, true);
+        count += COUNT_ROW(mVector + mRowLengthAligned*(row + 1), col, last_col_idx, true);
     }
     return count;
 }
@@ -390,15 +378,4 @@ unsigned Universe::lengthInStorageType() const {
 unsigned long Universe::lengthInBits() const
 {
     return mBits;
-}
-
-void Universe::setBorderRule(const BorderRule rule)
-{
-    if (rule == mBorderRule) return;
-    mBorderRule = rule;
-}
-
-BorderRule Universe::borderRule() const
-{
-    return mBorderRule;
 }

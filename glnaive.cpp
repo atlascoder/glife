@@ -9,14 +9,14 @@
 #include "universe.h"
 
 GLNaive::GLNaive(): GLAlgo(),
-    mMat(new Universe(mHeight, mWidth))
+    mUniverse(new Universe(mHeight, mWidth))
 {
-    mMat->clear();
+    mUniverse->clear();
 }
 
 GLNaive::~GLNaive()
 {
-
+    delete mUniverse;
 }
 
 QString GLNaive::name() const
@@ -28,49 +28,57 @@ void GLNaive::setSize(unsigned width, unsigned height)
 {
     mWidth = width;
     mHeight = height;
-    mMat->resize(mHeight, mWidth);
-    mMat->clear();
-    mSize = mMat->lengthInBits();
+    mUniverse->resize(mHeight, mWidth);
+    mUniverse->clear();
+    mSize = mUniverse->lengthInBits();
 }
 
 void GLNaive::reset()
 {
-    mMat->clear();
+    mUniverse->clear();
     mGeneration = 0;
 }
 
 void GLNaive::nextGen()
 {
     auto t1 = std::chrono::high_resolution_clock::now();
-    size_t size = mMat->lengthInBits();
-    Universe& bm = *mMat;
-    std::unique_ptr<Universe> next_mat(new Universe(mHeight, mWidth));
+    Universe& bm = *mUniverse;
+    Universe* next_mat(new Universe(mHeight, mWidth));
     Universe& next = *next_mat;
     next.clear();
     mPopulation = 0;
-    char (Universe::*fn)(unsigned long, int);
+    char (Universe::*countFunc)(unsigned, unsigned);
     switch (mBorderRule) {
     case BorderRule::CLOSING:
-        fn = &Universe::countMooreNeighborsBordersClosing;
+        countFunc = &Universe::nsWithClosingB;
         break;
     case BorderRule::ALIVE:
-        fn = &Universe::countMooreNeighborsBordersAlive;
+        countFunc = &Universe::nsWithAliveB;
         break;
     case BorderRule::DEAD:
-        fn = &Universe::countMooreNeighborsBordersDead;
+        countFunc = &Universe::nsWithDeadB;
         break;
     default:
-        fn = &Universe::countMooreNeighborsBordersClosing;
+        countFunc = &Universe::nsWithClosingB;
     }
 
-    for (size_t i = 0; i < size; i++) {
-        int count = (*mMat.*fn)(i, 4);
-        if (count == 3 || (count == 2 && bm[i])) {
-            next.set(i, true);
-            mPopulation++;
+    unsigned rows = mUniverse->rows();
+    unsigned cols = mUniverse->cols();
+    unsigned i = 0;
+
+    for (unsigned row = 0; row < rows; row++) {
+        for (unsigned col = 0; col < cols; col++) {
+            char count = (mUniverse->*countFunc)(row, col);
+            if (count == 3 || (count == 2 && bm[i])) {
+                next.set(i, true);
+                mPopulation++;
+            }
+            i++;
         }
     }
-    mMat.swap(next_mat);
+
+    std::swap(mUniverse, next_mat);
+    delete next_mat;
     mGeneration++;
     auto t2 = std::chrono::high_resolution_clock::now();
     mLastGenerationTime = static_cast<unsigned long>(std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
@@ -78,7 +86,7 @@ void GLNaive::nextGen()
 
 void GLNaive::insertSample(const QBitmap &other, unsigned x, unsigned y)
 {
-    Universe& bm = *mMat;
+    Universe& bm = *mUniverse;
     unsigned right = x + static_cast<unsigned>(other.width()) > bm.cols() ? bm.cols() : x + static_cast<unsigned>(other.width());
     unsigned bottom = y + static_cast<unsigned>(other.height()) > bm.rows() ? bm.rows() : y + static_cast<unsigned>(other.height());
     QImage img = other.toImage();
@@ -96,19 +104,19 @@ void GLNaive::setUniverse(const QBitmap&)
 
 QBitmap GLNaive::drawUniverse() const
 {
-    return QBitmap::fromData(QSize(static_cast<int>(mWidth), static_cast<int>(mHeight)), mMat->data(), QImage::Format::Format_Mono);
+    return QBitmap::fromData(QSize(static_cast<int>(mWidth), static_cast<int>(mHeight)), mUniverse->data(), QImage::Format::Format_Mono);
 }
 
 bool GLNaive::isAlive(unsigned x, unsigned y) const
 {
-    size_t idx = x + y * mWidth;
-    return (*mMat)[idx];
+    unsigned long idx = x + y * mWidth;
+    return (*mUniverse)[idx];
 }
 
 void GLNaive::toggle(unsigned x, unsigned y)
 {
-    size_t idx = x + y * mWidth;
-    mMat->set(idx, !(*mMat)[idx]);
+    unsigned long idx = x + y * mWidth;
+    mUniverse->set(idx, !(*mUniverse)[idx]);
 }
 
 
@@ -118,8 +126,8 @@ void GLNaive::randomize()
     static std::random_device rd;
     static std::mt19937 gen(rd());
     std::uniform_int_distribution<unsigned> rg;
-    size_t len = mMat->lengthInBits() / sizeof (int) / 8;
-    unsigned* p_mat_ints = reinterpret_cast<unsigned*>(mMat->data());
+    size_t len = mUniverse->lengthInBits() / sizeof (int) / 8;
+    unsigned* p_mat_ints = reinterpret_cast<unsigned*>(mUniverse->data());
     mPopulation = 0;
     for (size_t i = 0; i < len; i++) {
         unsigned val = rg(gen);
