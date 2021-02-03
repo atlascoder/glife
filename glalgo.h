@@ -6,6 +6,8 @@
 class QBitmap;
 class QString;
 
+typedef long long unsigned int size_t;
+
 class GLAlgo
 {
 public:
