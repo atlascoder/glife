@@ -91,6 +91,7 @@ Window {
                     ListElement { text: "Dead" }
                     ListElement { text: "Alive" }
                 }
+
                 currentIndex: lifeController.borderMode
                 onCurrentIndexChanged: lifeController.borderMode = currentIndex
             }

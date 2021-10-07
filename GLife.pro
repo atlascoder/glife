@@ -3,12 +3,16 @@ QT += quick
 CONFIG += c++14 sdk_no_version_check
 
 SOURCES += \
+        directorysampledatasource.cpp \
+        extrledirectorysamplesprovider.cpp \
+        extrlesampleconverter.cpp \
         glalgo.cpp \
         glnaive.cpp \
         lifecontroller.cpp \
         main.cpp \
-        rlereader.cpp \
-        samplescatalog.cpp \
+        sample.cpp \
+        samplecatalogmodel.cpp \
+        samplesprovider.cpp \
         sampleview.cpp \
         universe.cpp \
         universeview.cpp
@@ -22,12 +26,21 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    abstractsampleconverter.h \
+    abstractsampledatasource.h \
     borderrule.h \
+    directorysampledatasource.h \
+    extrledirectorysamplesprovider.h \
+    extrlesampleconverter.h \
     glalgo.h \
     glnaive.h \
     lifecontroller.h \
-    rlereader.h \
-    samplescatalog.h \
+ #   rlereader.h \
+    sample.h \
+    samplecatalogmodel.h \
+    sampledata.h \
+#    samplescatalog.h \
+    samplesprovider.h \
     sampleview.h \
     universe.h \
     universeview.h
